@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Olympus Curriculum Planner</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        /* Animation utilities */
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- Navigation -->
+    <nav class="bg-slate-900 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                
+                <!-- Logo -->
+                <div class="flex items-center gap-3">
+                    <i data-lucide="atom" class="text-amber-400 w-8 h-8"></i>
+                    <div>
+                        <h1 class="font-bold text-xl tracking-wide">OLYMPUS<span class="font-light opacity-80">PLANNER</span></h1>
+                        <p class="text-[10px] text-slate-400 uppercase tracking-wider hidden sm:block">IGCSE to Olympiad Bridge</p>
+                    </div>
+                </div>
+
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex space-x-2">
+                    <button onclick="switchTab('curriculum')" id="nav-curriculum" class="nav-btn flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors bg-slate-700 text-white shadow-sm">
+                        <i data-lucide="book" class="w-4 h-4"></i> Curriculum Map
+                    </button>
+                    <button onclick="switchTab('homework')" id="nav-homework" class="nav-btn flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors text-slate-300 hover:bg-slate-800 hover:text-white">
+                        <i data-lucide="activity" class="w-4 h-4"></i> Homework
+                    </button>
+                    <button onclick="switchTab('handouts')" id="nav-handouts" class="nav-btn flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors text-slate-300 hover:bg-slate-800 hover:text-white">
+                        <i data-lucide="file-text" class="w-4 h-4"></i> Handouts
+                    </button>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <div class="md:hidden flex items-center">
+                    <button onclick="toggleMobileMenu()" class="text-slate-300 hover:text-white focus:outline-none">
+                        <i data-lucide="menu" id="mobile-menu-icon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-slate-800 px-4 pt-2 pb-4 space-y-1 border-t border-slate-700">
+            <button onclick="switchTab('curriculum')" class="mobile-nav-btn block w-full text-left px-3 py-3 rounded-md text-base font-medium text-slate-300 hover:bg-slate-700 hover:text-white">
+                <i data-lucide="book" class="inline w-4 h-4 mr-2"></i> Curriculum Map
+            </button>
+            <button onclick="switchTab('homework')" class="mobile-nav-btn block w-full text-left px-3 py-3 rounded-md text-base font-medium text-slate-300 hover:bg-slate-700 hover:text-white">
+                <i data-lucide="activity" class="inline w-4 h-4 mr-2"></i> Homework
+            </button>
+            <button onclick="switchTab('handouts')" class="mobile-nav-btn block w-full text-left px-3 py-3 rounded-md text-base font-medium text-slate-300 hover:bg-slate-700 hover:text-white">
+                <i data-lucide="file-text" class="inline w-4 h-4 mr-2"></i> Handouts
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
+        <div id="app-content" class="fade-in">
+            <!-- Content injected via JS -->
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 mt-auto py-8">
+        <div class="max-w-7xl mx-auto px-4 text-center text-slate-400 text-sm">
+            <p>&copy; 2024 Olympus Physics Academy</p>
+        </div>
+    </footer>
+
+    <!-- Application Logic -->
+    <script>
+        // --- DATA ---
+        const curriculumData = [
+            {
+                id: 1,
+                title: "The Foundations of Motion",
+                range: "Lessons 1–12",
+                theme: "Mechanics I",
+                color: "bg-blue-50 border-blue-200 text-blue-700",
+                description: "Core Kinematics & Newton's Basics.",
+                lessons: [
+                    { id: "L1-3", title: "General Physics", content: "Units, Dimensional Analysis, Vectors vs. Scalars." },
+                    { id: "L4-7", title: "Kinematics", content: "Speed, Velocity, Acceleration, Graphs." },
+                    { id: "L8-12", title: "Dynamics", content: "Newton’s Laws, Mass vs. Weight." }
+                ]
+            },
+            {
+                id: 2,
+                title: "Energy, Matter & Heat",
+                range: "Lessons 13–22",
+                theme: "Energy & Thermal",
+                color: "bg-orange-50 border-orange-200 text-orange-700",
+                description: "Scalar quantities and thermal properties.",
+                lessons: [
+                    { id: "L13-16", title: "Work & Energy", content: "Energy types, Transfers, Conservation, Work & Power." },
+                    { id: "L17-19", title: "Matter Physics", content: "Kinetic Model of Matter, Density, Pressure." },
+                    { id: "L20-22", title: "Thermal Physics", content: "Specific Heat, Latent Heat." }
+                ]
+            },
+            {
+                id: 3,
+                title: "Waves, Light & Sound",
+                range: "Lessons 23–32",
+                theme: "Waves",
+                color: "bg-cyan-50 border-cyan-200 text-cyan-700",
+                description: "Geometric reasoning and properties of waves.",
+                lessons: [
+                    { id: "L23-25", title: "Wave Properties", content: "Transverse/Longitudinal, v=fλ. (Note: Introduce Period T=1/f)." },
+                    { id: "L26-29", title: "Light & Optics", content: "Reflection, Refraction, Snell’s Law, Total Internal Reflection." },
+                    { id: "L30-32", title: "Sound & EM", content: "Sound waves & Electromagnetic Spectrum." }
+                ]
+            },
+            {
+                id: 4,
+                title: "Electricity & Magnetism",
+                range: "Lessons 33–44",
+                theme: "Circuits",
+                color: "bg-yellow-50 border-yellow-200 text-yellow-700",
+                description: "Logic, circuits, and invisible fields.",
+                lessons: [
+                    { id: "L33-35", title: "Static Electricity", content: "Electric Fields & Charge." },
+                    { id: "L36-40", title: "Current Electricity", content: "Series/Parallel, V=IR, P=IV. (Focus: Resistor Cube visualization)." },
+                    { id: "L41-44", title: "Electromagnetism", content: "Motors, Generators, Transformers." }
+                ]
+            },
+            {
+                id: 5,
+                title: "Advanced Mechanics",
+                range: "Lessons 45–54",
+                theme: "Mechanics II",
+                color: "bg-purple-50 border-purple-200 text-purple-700",
+                description: "Complex vector applications and systems.",
+                lessons: [
+                    { id: "L45-48", title: "Statics", content: "Moments, Center of Mass, Equilibrium. (Ext: Ladders/Torque)." },
+                    { id: "L49-51", title: "Momentum", content: "Momentum & Impulse (1D collisions)." },
+                    { id: "L52-54", title: "Materials", content: "Springs (Hooke’s Law) & Mechanical Properties." }
+                ]
+            },
+            {
+                id: 6,
+                title: "Atomic Physics & Final Review",
+                range: "Lessons 55–60",
+                theme: "Modern Physics",
+                color: "bg-emerald-50 border-emerald-200 text-emerald-700",
+                description: "Modern Physics and Exam Prep.",
+                lessons: [
+                    { id: "L55-57", title: "Atomic Physics", content: "Atomic Model, Isotopes, Radioactivity." },
+                    { id: "L58", title: "Space Physics", content: "Space Physics basics." },
+                    { id: "L59-60", title: "Final Review", content: "Full Mock Exams & Strategy." }
+                ]
+            }
+        ];
+
+        let homeworkData = [
+            { id: 1, lesson: "L1-3", title: "Dimensional Analysis Drill", type: "IGCSE", status: "completed", dueDate: "Week 1" },
+            { id: 2, lesson: "L1-3", title: "The 'Impossible' Unit Conversion", type: "BPhO", status: "completed", dueDate: "Week 1" },
+            { id: 3, lesson: "L4-7", title: "Velocity-Time Graph Mystery", type: "PhysicsBowl", status: "pending", dueDate: "Week 2" },
+            { id: 4, lesson: "L8-12", title: "Elevator Problems (F=ma)", type: "BPhO", status: "pending", dueDate: "Week 3" },
+            { id: 5, lesson: "L13-16", title: "Energy Efficiency Audit", type: "Lab", status: "pending", dueDate: "Week 5" }
+        ];
+
+        const handoutData = [
+            { id: 1, title: "Dimensional Analysis Cheat Sheet", type: "PDF", size: "2.4 MB", tag: "Reference", icon: "file-text" },
+            { id: 2, title: "BPhO Junior Past Papers (2015-2020)", type: "Zip", size: "15 MB", tag: "Exam Prep", icon: "file-archive" },
+            { id: 3, title: "Graphing Motion: Workbook", type: "PDF", size: "1.1 MB", tag: "Worksheet", icon: "file-text" },
+            { id: 4, title: "Olympiad Constant Sheet", type: "PDF", size: "0.5 MB", tag: "Reference", icon: "file-text" },
+            { id: 5, title: "Circuit Symbols & Logic", type: "Img", size: "0.8 MB", tag: "Diagram", icon: "image" },
+            { id: 6, title: "Interactive: The Photoelectric Effect", type: "Link", size: "Web", tag: "Simulation", icon: "play-circle" },
+        ];
+
+        // --- STATE ---
+        let state = {
+            activeTab: 'curriculum',
+            activeModule: 0,
+            mobileMenu: false
+        };
+
+        // --- RENDER FUNCTIONS ---
+
+        function render() {
+            // Update Navbar State
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-slate-700', 'text-white', 'shadow-sm');
+                btn.classList.add('text-slate-300', 'hover:bg-slate-800', 'hover:text-white');
+            });
+            const activeBtn = document.getElementById(`nav-${state.activeTab}`);
+            if(activeBtn) {
+                activeBtn.classList.add('bg-slate-700', 'text-white', 'shadow-sm');
+                activeBtn.classList.remove('text-slate-300', 'hover:bg-slate-800');
+            }
+
+            // Render Content
+            const container = document.getElementById('app-content');
+            container.innerHTML = ''; // Clear current content
+
+            if (state.activeTab === 'curriculum') {
+                renderCurriculum(container);
+            } else if (state.activeTab === 'homework') {
+                renderHomework(container);
+            } else if (state.activeTab === 'handouts') {
+                renderHandouts(container);
+            }
+
+            // Refresh Icons
+            lucide.createIcons();
+        }
+
+        function renderCurriculum(container) {
+            const currentMod = curriculumData[state.activeModule];
+
+            // Grid Container
+            const grid = document.createElement('div');
+            grid.className = "grid grid-cols-1 lg:grid-cols-12 gap-6 h-auto lg:h-[800px]";
+
+            // Sidebar
+            const sidebar = document.createElement('div');
+            sidebar.className = "lg:col-span-3 space-y-3 overflow-y-auto pr-2 custom-scrollbar";
+            
+            curriculumData.forEach((mod, idx) => {
+                const isActive = idx === state.activeModule;
+                const btn = document.createElement('button');
+                btn.onclick = () => { state.activeModule = idx; render(); };
+                btn.className = `w-full text-left p-4 rounded-lg border shadow-sm transition-all hover:shadow-md group ${
+                    isActive ? `${mod.color} ring-1 ring-inset` : 'bg-white border-slate-200 hover:bg-slate-50 text-slate-500'
+                }`;
+                btn.innerHTML = `
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-[10px] font-bold uppercase tracking-wider ${isActive ? '' : 'text-slate-400 group-hover:text-slate-500'}">
+                            Module ${mod.id}
+                        </span>
+                        <span class="text-[10px] opacity-70">${mod.range}</span>
+                    </div>
+                    <h4 class="font-bold text-sm ${isActive ? '' : 'text-slate-800'}">${mod.title}</h4>
+                `;
+                sidebar.appendChild(btn);
+            });
+
+            // Main View
+            const main = document.createElement('div');
+            main.className = "lg:col-span-9 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col h-full";
+            
+            main.innerHTML = `
+                <div class="relative h-40 bg-slate-800 shrink-0 overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-br from-slate-800 to-slate-900"></div>
+                    <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 24px 24px;"></div>
+                    <div class="absolute bottom-0 left-0 p-6 w-full">
+                        <div class="flex items-center gap-2 text-amber-400 mb-1">
+                            <i data-lucide="atom" class="w-5 h-5"></i>
+                            <span class="text-xs font-bold uppercase tracking-widest">Current Module</span>
+                        </div>
+                        <h3 class="text-2xl font-bold text-white">${currentMod.title}</h3>
+                        <p class="text-slate-300 text-sm mt-1">${currentMod.description}</p>
+                    </div>
+                </div>
+                <div class="flex-grow overflow-y-auto p-0 bg-slate-50">
+                    <div class="divide-y divide-slate-100" id="lesson-list"></div>
+                </div>
+            `;
+
+            const lessonList = main.querySelector('#lesson-list');
+            currentMod.lessons.forEach(lesson => {
+                const lessonDiv = document.createElement('div');
+                lessonDiv.className = "flex items-start gap-4 p-5 hover:bg-white transition-colors group";
+                lessonDiv.innerHTML = `
+                    <div class="flex-shrink-0 w-16 pt-1">
+                        <span class="text-xs font-bold text-slate-400 group-hover:text-blue-600 transition-colors">${lesson.id}</span>
+                    </div>
+                    <div class="flex-grow">
+                        <h5 class="font-bold text-slate-800 text-sm">${lesson.title}</h5>
+                        <p class="text-sm text-slate-600 mt-1 leading-relaxed">${lesson.content}</p>
+                    </div>
+                    <i data-lucide="chevron-right" class="w-4 h-4 text-slate-300 group-hover:text-slate-400"></i>
+                `;
+                lessonList.appendChild(lessonDiv);
+            });
+
+            grid.appendChild(sidebar);
+            grid.appendChild(main);
+            container.appendChild(grid);
+        }
+
+        function renderHomework(container) {
+            const completedCount = homeworkData.filter(h => h.status === 'completed').length;
+            const totalCount = homeworkData.length;
+            const percentage = Math.round((completedCount / totalCount) * 100) || 0;
+
+            const grid = document.createElement('div');
+            grid.className = "grid grid-cols-1 lg:grid-cols-3 gap-8";
+
+            // Stats Panel
+            const stats = document.createElement('div');
+            stats.className = "lg:col-span-1 space-y-6";
+            stats.innerHTML = `
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                    <h3 class="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
+                        <i data-lucide="trophy" class="w-4 h-4 text-amber-500"></i> Training Stats
+                    </h3>
+                    <div class="text-center mb-6">
+                        <span class="text-4xl font-bold text-slate-800">${completedCount}</span>
+                        <span class="text-slate-400 text-xl font-light">/${totalCount}</span>
+                        <p class="text-xs text-slate-500 uppercase tracking-wider mt-2 font-semibold">Missions Complete</p>
+                    </div>
+                    <div class="w-full bg-slate-200 rounded-full h-2 mb-4">
+                        <div class="bg-amber-500 h-2 rounded-full transition-all duration-500 ease-in-out" style="width: ${percentage}%"></div>
+                    </div>
+                    <div class="flex justify-between text-xs text-slate-500 mt-1">
+                        <span>Progress</span>
+                        <span class="font-bold text-slate-700">${percentage}%</span>
+                    </div>
+                </div>
+                <div class="bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl shadow-lg p-6 text-white relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-12 bg-blue-500 opacity-10 blur-2xl rounded-full"></div>
+                    <h4 class="font-bold relative z-10">Next Olympiad Milestone</h4>
+                    <p class="text-sm text-slate-300 mt-2 relative z-10 leading-relaxed">
+                        Complete all <strong>Module 1</strong> BPhO challenges to unlock the Kinematics Master badge.
+                    </p>
+                    <button class="mt-4 px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-900 text-xs font-bold rounded transition-colors relative z-10">View Challenge</button>
+                </div>
+            `;
+
+            // List
+            const listContainer = document.createElement('div');
+            listContainer.className = "lg:col-span-2 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden";
+            listContainer.innerHTML = `
+                <div class="p-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                    <h3 class="font-bold text-slate-800 text-sm">Active Assignments</h3>
+                    <div class="flex gap-2">
+                        <button class="p-1.5 hover:bg-white rounded text-slate-400 hover:text-slate-600 transition-colors"><i data-lucide="filter" class="w-4 h-4"></i></button>
+                        <button class="p-1.5 hover:bg-white rounded text-slate-400 hover:text-slate-600 transition-colors"><i data-lucide="search" class="w-4 h-4"></i></button>
+                    </div>
+                </div>
+                <div class="divide-y divide-slate-100" id="task-rows"></div>
+            `;
+            
+            const taskRows = listContainer.querySelector('#task-rows');
+            homeworkData.forEach(task => {
+                const isDone = task.status === 'completed';
+                const row = document.createElement('div');
+                row.className = `p-4 flex items-center gap-4 hover:bg-slate-50 transition-colors ${isDone ? 'bg-slate-50/50' : ''}`;
+                
+                // Tag styling helper
+                let tagClass = "bg-slate-100 text-slate-600 border-slate-200";
+                if (task.type === "BPhO") tagClass = "bg-amber-50 text-amber-700 border-amber-200";
+                if (task.type === "PhysicsBowl") tagClass = "bg-purple-50 text-purple-700 border-purple-200";
+                if (task.type === "IGCSE") tagClass = "bg-blue-50 text-blue-700 border-blue-200";
+                if (task.type === "Lab") tagClass = "bg-emerald-50 text-emerald-700 border-emerald-200";
+
+                row.innerHTML = `
+                    <button onclick="toggleTask(${task.id})" class="flex-shrink-0 focus:outline-none">
+                        ${isDone 
+                            ? `<i data-lucide="check-circle" class="w-5 h-5 text-emerald-500"></i>` 
+                            : `<i data-lucide="circle" class="w-5 h-5 text-slate-300 hover:text-blue-500 transition-colors"></i>`
+                        }
+                    </button>
+                    <div class="flex-grow min-w-0">
+                        <div class="flex items-center gap-2 mb-1">
+                            <h4 class="text-sm font-semibold truncate ${isDone ? 'text-slate-400 line-through' : 'text-slate-800'}">${task.title}</h4>
+                            <span class="px-2 py-0.5 rounded text-[10px] uppercase font-bold border tracking-wider ${tagClass}">${task.type}</span>
+                        </div>
+                        <div class="flex items-center gap-4 text-xs text-slate-500">
+                            <span class="flex items-center gap-1"><i data-lucide="book" class="w-3 h-3"></i> ${task.lesson}</span>
+                            <span class="flex items-center gap-1"><i data-lucide="clock" class="w-3 h-3"></i> ${task.dueDate}</span>
+                        </div>
+                    </div>
+                `;
+                taskRows.appendChild(row);
+            });
+
+            grid.appendChild(stats);
+            grid.appendChild(listContainer);
+            container.appendChild(grid);
+        }
+
+        function renderHandouts(container) {
+            const wrapper = document.createElement('div');
+            
+            wrapper.innerHTML = `
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900">Resource Library</h2>
+                        <p class="text-slate-500 text-sm">Reference sheets, past papers, and worksheets.</p>
+                    </div>
+                    <button class="flex items-center gap-2 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-lg transition-colors shadow-sm">
+                        <i data-lucide="download" class="w-4 h-4"></i> Download All
+                    </button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="handout-grid"></div>
+            `;
+            
+            const grid = wrapper.querySelector('#handout-grid');
+            handoutData.forEach(file => {
+                const card = document.createElement('div');
+                card.className = "group bg-white rounded-xl shadow-sm border border-slate-200 hover:shadow-md hover:border-blue-200 transition-all cursor-pointer p-5 flex flex-col h-40";
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="p-2 bg-slate-50 rounded-lg group-hover:bg-blue-50 transition-colors">
+                            <i data-lucide="${file.icon || 'file-text'}" class="w-6 h-6 text-slate-400 group-hover:text-blue-600"></i>
+                        </div>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 bg-slate-50 px-2 py-1 rounded">${file.type}</span>
+                    </div>
+                    <div class="flex-grow">
+                        <h4 class="font-bold text-slate-800 text-sm group-hover:text-blue-700 transition-colors line-clamp-2">${file.title}</h4>
+                    </div>
+                    <div class="flex justify-between items-center text-xs text-slate-400 pt-3 border-t border-slate-50">
+                        <span>${file.tag}</span>
+                        <span>${file.size}</span>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+
+            container.appendChild(wrapper);
+        }
+
+        // --- ACTIONS ---
+        function switchTab(tabId) {
+            state.activeTab = tabId;
+            // Close mobile menu if open
+            const mobileMenu = document.getElementById('mobile-menu');
+            if (!mobileMenu.classList.contains('hidden')) {
+                mobileMenu.classList.add('hidden');
+            }
+            render();
+        }
+
+        function toggleTask(id) {
+            homeworkData = homeworkData.map(task => 
+                task.id === id ? { ...task, status: task.status === 'completed' ? 'pending' : 'completed' } : task
+            );
+            render(); // Re-render to update UI
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            const icon = document.getElementById('mobile-menu-icon');
+            menu.classList.toggle('hidden');
+            if (menu.classList.contains('hidden')) {
+                icon.setAttribute('data-lucide', 'menu');
+            } else {
+                icon.setAttribute('data-lucide', 'x');
+            }
+            lucide.createIcons();
+        }
+
+        // --- INIT ---
+        document.addEventListener('DOMContentLoaded', () => {
+            render();
+        });
+
+    </script>
+</body>
+</html>
