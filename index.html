@@ -1,0 +1,462 @@
+import React, { useState } from 'react';
+import { 
+  Book, 
+  CheckCircle, 
+  Circle, 
+  ChevronRight, 
+  Atom, 
+  Zap, 
+  Activity, 
+  Clock,
+  Menu,
+  X,
+  FileText,
+  Download,
+  PlayCircle,
+  Trophy,
+  Search,
+  Filter
+} from 'lucide-react';
+
+// --- Data Definitions ---
+
+const curriculumData = [
+  {
+    id: 1,
+    title: "The Foundations of Motion",
+    range: "Lessons 1–12",
+    theme: "Mechanics I",
+    color: "bg-blue-50 border-blue-200 text-blue-700",
+    iconColor: "text-blue-600",
+    description: "Core Kinematics & Newton's Basics.",
+    lessons: [
+      { id: "L1-3", title: "General Physics", content: "Units, Dimensional Analysis, Vectors vs. Scalars." },
+      { id: "L4-7", title: "Kinematics", content: "Speed, Velocity, Acceleration, Graphs." },
+      { id: "L8-12", title: "Dynamics", content: "Newton’s Laws, Mass vs. Weight." }
+    ]
+  },
+  {
+    id: 2,
+    title: "Energy, Matter & Heat",
+    range: "Lessons 13–22",
+    theme: "Energy & Thermal",
+    color: "bg-orange-50 border-orange-200 text-orange-700",
+    iconColor: "text-orange-600",
+    description: "Scalar quantities and thermal properties.",
+    lessons: [
+      { id: "L13-16", title: "Work & Energy", content: "Energy types, Transfers, Conservation, Work & Power." },
+      { id: "L17-19", title: "Matter Physics", content: "Kinetic Model of Matter, Density, Pressure." },
+      { id: "L20-22", title: "Thermal Physics", content: "Specific Heat, Latent Heat." }
+    ]
+  },
+  {
+    id: 3,
+    title: "Waves, Light & Sound",
+    range: "Lessons 23–32",
+    theme: "Waves",
+    color: "bg-cyan-50 border-cyan-200 text-cyan-700",
+    iconColor: "text-cyan-600",
+    description: "Geometric reasoning and properties of waves.",
+    lessons: [
+      { id: "L23-25", title: "Wave Properties", content: "Transverse/Longitudinal, v=fλ. (Note: Introduce Period T=1/f)." },
+      { id: "L26-29", title: "Light & Optics", content: "Reflection, Refraction, Snell’s Law, Total Internal Reflection." },
+      { id: "L30-32", title: "Sound & EM", content: "Sound waves & Electromagnetic Spectrum." }
+    ]
+  },
+  {
+    id: 4,
+    title: "Electricity & Magnetism",
+    range: "Lessons 33–44",
+    theme: "Circuits",
+    color: "bg-yellow-50 border-yellow-200 text-yellow-700",
+    iconColor: "text-yellow-600",
+    description: "Logic, circuits, and invisible fields.",
+    lessons: [
+      { id: "L33-35", title: "Static Electricity", content: "Electric Fields & Charge." },
+      { id: "L36-40", title: "Current Electricity", content: "Series/Parallel, V=IR, P=IV. (Focus: Resistor Cube visualization)." },
+      { id: "L41-44", title: "Electromagnetism", content: "Motors, Generators, Transformers." }
+    ]
+  },
+  {
+    id: 5,
+    title: "Advanced Mechanics",
+    range: "Lessons 45–54",
+    theme: "Mechanics II",
+    color: "bg-purple-50 border-purple-200 text-purple-700",
+    iconColor: "text-purple-600",
+    description: "Complex vector applications and systems.",
+    lessons: [
+      { id: "L45-48", title: "Statics", content: "Moments, Center of Mass, Equilibrium. (Ext: Ladders/Torque)." },
+      { id: "L49-51", title: "Momentum", content: "Momentum & Impulse (1D collisions)." },
+      { id: "L52-54", title: "Materials", content: "Springs (Hooke’s Law) & Mechanical Properties." }
+    ]
+  },
+  {
+    id: 6,
+    title: "Atomic Physics & Final Review",
+    range: "Lessons 55–60",
+    theme: "Modern Physics",
+    color: "bg-emerald-50 border-emerald-200 text-emerald-700",
+    iconColor: "text-emerald-600",
+    description: "Modern Physics and Exam Prep.",
+    lessons: [
+      { id: "L55-57", title: "Atomic Physics", content: "Atomic Model, Isotopes, Radioactivity." },
+      { id: "L58", title: "Space Physics", content: "Space Physics basics." },
+      { id: "L59-60", title: "Final Review", content: "Full Mock Exams & Strategy." }
+    ]
+  }
+];
+
+const initialHomework = [
+  { id: 1, lesson: "L1-3", title: "Dimensional Analysis Drill", type: "IGCSE", status: "completed", dueDate: "Week 1" },
+  { id: 2, lesson: "L1-3", title: "The 'Impossible' Unit Conversion", type: "BPhO", status: "completed", dueDate: "Week 1" },
+  { id: 3, lesson: "L4-7", title: "Velocity-Time Graph Mystery", type: "PhysicsBowl", status: "pending", dueDate: "Week 2" },
+  { id: 4, lesson: "L8-12", title: "Elevator Problems (F=ma)", type: "BPhO", status: "pending", dueDate: "Week 3" },
+  { id: 5, lesson: "L13-16", title: "Energy Efficiency Audit", type: "Lab", status: "pending", dueDate: "Week 5" },
+];
+
+const handoutData = [
+  { id: 1, title: "Dimensional Analysis Cheat Sheet", type: "PDF", size: "2.4 MB", tag: "Reference" },
+  { id: 2, title: "BPhO Junior Past Papers (2015-2020)", type: "Zip", size: "15 MB", tag: "Exam Prep" },
+  { id: 3, title: "Graphing Motion: Workbook", type: "PDF", size: "1.1 MB", tag: "Worksheet" },
+  { id: 4, title: "Olympiad Constant Sheet", type: "PDF", size: "0.5 MB", tag: "Reference" },
+  { id: 5, title: "Circuit Symbols & Logic", type: "Img", size: "0.8 MB", tag: "Diagram" },
+  { id: 6, title: "Interactive: The Photoelectric Effect", type: "Link", size: "Web", tag: "Simulation" },
+];
+
+// --- Sub-Components ---
+
+const ProgressBar = ({ completed, total }) => {
+  const percentage = Math.round((completed / total) * 100) || 0;
+  return (
+    <div className="w-full bg-slate-200 rounded-full h-2 mb-4">
+      <div 
+        className="bg-amber-500 h-2 rounded-full transition-all duration-500 ease-in-out" 
+        style={{ width: `${percentage}%` }}
+      />
+      <div className="flex justify-between text-xs text-slate-500 mt-1">
+        <span>Progress</span>
+        <span className="font-bold text-slate-700">{percentage}%</span>
+      </div>
+    </div>
+  );
+};
+
+const Tag = ({ type }) => {
+  let styles = "bg-slate-100 text-slate-600 border-slate-200";
+  if (type === "BPhO") styles = "bg-amber-50 text-amber-700 border-amber-200";
+  if (type === "PhysicsBowl") styles = "bg-purple-50 text-purple-700 border-purple-200";
+  if (type === "IGCSE") styles = "bg-blue-50 text-blue-700 border-blue-200";
+  if (type === "Lab") styles = "bg-emerald-50 text-emerald-700 border-emerald-200";
+
+  return (
+    <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold border tracking-wider ${styles}`}>
+      {type}
+    </span>
+  );
+};
+
+// --- Views ---
+
+const CurriculumView = ({ activeModule, setActiveModule }) => {
+  const currentMod = curriculumData[activeModule];
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-auto lg:h-[800px]">
+      {/* Sidebar */}
+      <div className="lg:col-span-3 space-y-3 overflow-y-auto pr-2 custom-scrollbar">
+        {curriculumData.map((mod, idx) => (
+          <button
+            key={mod.id}
+            onClick={() => setActiveModule(idx)}
+            className={`w-full text-left p-4 rounded-lg border shadow-sm transition-all hover:shadow-md group ${
+              idx === activeModule 
+                ? `${mod.color} ring-1 ring-inset` 
+                : 'bg-white border-slate-200 hover:bg-slate-50 text-slate-500'
+            }`}
+          >
+            <div className="flex justify-between items-center mb-1">
+              <span className={`text-[10px] font-bold uppercase tracking-wider ${idx === activeModule ? '' : 'text-slate-400 group-hover:text-slate-500'}`}>
+                Module {mod.id}
+              </span>
+              <span className="text-[10px] opacity-70">{mod.range}</span>
+            </div>
+            <h4 className={`font-bold text-sm ${idx === activeModule ? '' : 'text-slate-800'}`}>
+              {mod.title}
+            </h4>
+          </button>
+        ))}
+      </div>
+
+      {/* Main Content */}
+      <div className="lg:col-span-9 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col h-full">
+        {/* Header */}
+        <div className="relative h-40 bg-slate-800 shrink-0 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-800 to-slate-900" />
+          <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '24px 24px' }}></div>
+          <div className="absolute bottom-0 left-0 p-6 w-full">
+            <div className="flex items-center gap-2 text-amber-400 mb-1">
+               <Atom className="w-5 h-5" />
+               <span className="text-xs font-bold uppercase tracking-widest">Current Module</span>
+            </div>
+            <h3 className="text-2xl font-bold text-white">{currentMod.title}</h3>
+            <p className="text-slate-300 text-sm mt-1">{currentMod.description}</p>
+          </div>
+        </div>
+
+        {/* Lesson List */}
+        <div className="flex-grow overflow-y-auto p-0 bg-slate-50">
+          <div className="divide-y divide-slate-100">
+            {currentMod.lessons.map((lesson, idx) => (
+              <div key={idx} className="flex items-start gap-4 p-5 hover:bg-white transition-colors group">
+                <div className="flex-shrink-0 w-16 pt-1">
+                  <span className="text-xs font-bold text-slate-400 group-hover:text-blue-600 transition-colors">
+                    {lesson.id}
+                  </span>
+                </div>
+                <div className="flex-grow">
+                  <h5 className="font-bold text-slate-800 text-sm">{lesson.title}</h5>
+                  <p className="text-sm text-slate-600 mt-1 leading-relaxed">{lesson.content}</p>
+                </div>
+                <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-slate-400" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const HomeworkView = ({ homeworkList, toggleHomework }) => {
+  const completedCount = homeworkList.filter(h => h.status === 'completed').length;
+  const totalCount = homeworkList.length;
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      {/* Stats Panel */}
+      <div className="lg:col-span-1 space-y-6">
+         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+            <h3 className="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
+              <Trophy className="w-4 h-4 text-amber-500" /> 
+              Training Stats
+            </h3>
+            <div className="text-center mb-6">
+              <span className="text-4xl font-bold text-slate-800">{completedCount}</span>
+              <span className="text-slate-400 text-xl font-light">/{totalCount}</span>
+              <p className="text-xs text-slate-500 uppercase tracking-wider mt-2 font-semibold">Missions Complete</p>
+            </div>
+            <ProgressBar completed={completedCount} total={totalCount} />
+         </div>
+
+         <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl shadow-lg p-6 text-white relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-12 bg-blue-500 opacity-10 blur-2xl rounded-full"></div>
+            <h4 className="font-bold relative z-10">Next Olympiad Milestone</h4>
+            <p className="text-sm text-slate-300 mt-2 relative z-10 leading-relaxed">
+              Complete all <strong>Module 1</strong> BPhO challenges to unlock the Kinematics Master badge.
+            </p>
+            <button className="mt-4 px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-900 text-xs font-bold rounded transition-colors relative z-10">
+              View Challenge
+            </button>
+         </div>
+      </div>
+
+      {/* Task List */}
+      <div className="lg:col-span-2">
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+          <div className="p-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+             <h3 className="font-bold text-slate-800 text-sm">Active Assignments</h3>
+             <div className="flex gap-2">
+                <button className="p-1.5 hover:bg-white rounded text-slate-400 hover:text-slate-600 transition-colors">
+                  <Filter className="w-4 h-4" />
+                </button>
+                <button className="p-1.5 hover:bg-white rounded text-slate-400 hover:text-slate-600 transition-colors">
+                  <Search className="w-4 h-4" />
+                </button>
+             </div>
+          </div>
+          <div className="divide-y divide-slate-100">
+            {homeworkList.map(task => (
+              <div key={task.id} className={`p-4 flex items-center gap-4 hover:bg-slate-50 transition-colors ${task.status === 'completed' ? 'bg-slate-50/50' : ''}`}>
+                <button onClick={() => toggleHomework(task.id)} className="flex-shrink-0">
+                  {task.status === 'completed' ? (
+                    <CheckCircle className="w-5 h-5 text-emerald-500" />
+                  ) : (
+                    <Circle className="w-5 h-5 text-slate-300 hover:text-blue-500 transition-colors" />
+                  )}
+                </button>
+                <div className="flex-grow min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h4 className={`text-sm font-semibold truncate ${task.status === 'completed' ? 'text-slate-400 line-through' : 'text-slate-800'}`}>
+                      {task.title}
+                    </h4>
+                    <Tag type={task.type} />
+                  </div>
+                  <div className="flex items-center gap-4 text-xs text-slate-500">
+                    <span className="flex items-center gap-1">
+                      <Book className="w-3 h-3" /> {task.lesson}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Clock className="w-3 h-3" /> {task.dueDate}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const HandoutsView = () => {
+  return (
+    <div>
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h2 className="text-xl font-bold text-slate-900">Resource Library</h2>
+          <p className="text-slate-500 text-sm">Reference sheets, past papers, and worksheets.</p>
+        </div>
+        <button className="flex items-center gap-2 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-lg transition-colors shadow-sm">
+          <Download className="w-4 h-4" /> Download All
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {handoutData.map((file) => (
+          <div key={file.id} className="group bg-white rounded-xl shadow-sm border border-slate-200 hover:shadow-md hover:border-blue-200 transition-all cursor-pointer p-5 flex flex-col h-40">
+            <div className="flex justify-between items-start mb-3">
+              <div className="p-2 bg-slate-50 rounded-lg group-hover:bg-blue-50 transition-colors">
+                {file.type === 'Link' ? <PlayCircle className="w-6 h-6 text-slate-400 group-hover:text-blue-600" /> : <FileText className="w-6 h-6 text-slate-400 group-hover:text-blue-600" />}
+              </div>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 bg-slate-50 px-2 py-1 rounded">
+                {file.type}
+              </span>
+            </div>
+            <div className="flex-grow">
+              <h4 className="font-bold text-slate-800 text-sm group-hover:text-blue-700 transition-colors line-clamp-2">
+                {file.title}
+              </h4>
+            </div>
+            <div className="flex justify-between items-center text-xs text-slate-400 pt-3 border-t border-slate-50">
+              <span>{file.tag}</span>
+              <span>{file.size}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// --- Main App Component ---
+
+const App = () => {
+  const [activeTab, setActiveTab] = useState('curriculum');
+  const [activeModule, setActiveModule] = useState(0);
+  const [homeworkList, setHomeworkList] = useState(initialHomework);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const toggleHomework = (id) => {
+    setHomeworkList(homeworkList.map(item => 
+      item.id === id 
+        ? { ...item, status: item.status === 'completed' ? 'pending' : 'completed' }
+        : item
+    ));
+  };
+
+  const navItems = [
+    { id: 'curriculum', label: 'Curriculum Map', icon: <Book className="w-4 h-4" /> },
+    { id: 'homework', label: 'Homework', icon: <Activity className="w-4 h-4" /> },
+    { id: 'handouts', label: 'Handouts', icon: <FileText className="w-4 h-4" /> },
+  ];
+
+  return (
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-800">
+      
+      {/* Navigation */}
+      <nav className="bg-slate-900 text-white shadow-lg sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            
+            {/* Logo Area */}
+            <div className="flex items-center gap-3">
+               <Atom className="text-amber-400 w-8 h-8" />
+               <div>
+                  <h1 className="font-bold text-xl tracking-wide">OLYMPUS<span className="font-light opacity-80">PLANNER</span></h1>
+                  <p className="text-[10px] text-slate-400 uppercase tracking-wider hidden sm:block">IGCSE to Olympiad Bridge</p>
+               </div>
+            </div>
+
+            {/* Desktop Nav */}
+            <div className="hidden md:flex space-x-2">
+              {navItems.map(item => (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id)}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                    activeTab === item.id 
+                      ? 'bg-slate-700 text-white shadow-sm' 
+                      : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                  }`}
+                >
+                  {item.icon}
+                  {item.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Mobile Menu Button */}
+            <div className="md:hidden flex items-center">
+              <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="text-slate-300 hover:text-white">
+                {mobileMenuOpen ? <X /> : <Menu />}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Nav Drawer */}
+        {mobileMenuOpen && (
+          <div className="md:hidden bg-slate-800 px-4 pt-2 pb-4 space-y-1 border-t border-slate-700">
+            {navItems.map(item => (
+              <button 
+                key={item.id}
+                onClick={() => { setActiveTab(item.id); setMobileMenuOpen(false); }}
+                className={`flex items-center gap-3 w-full text-left px-3 py-3 rounded-md text-base font-medium ${
+                  activeTab === item.id ? 'bg-slate-700 text-white' : 'text-slate-300'
+                }`}
+              >
+                {item.icon}
+                {item.label}
+              </button>
+            ))}
+          </div>
+        )}
+      </nav>
+
+      {/* Main Content Area */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        {/* Tab Content Switching */}
+        <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+          {activeTab === 'curriculum' && (
+            <CurriculumView activeModule={activeModule} setActiveModule={setActiveModule} />
+          )}
+
+          {activeTab === 'homework' && (
+            <HomeworkView homeworkList={homeworkList} toggleHomework={toggleHomework} />
+          )}
+
+          {activeTab === 'handouts' && (
+             <HandoutsView />
+          )}
+        </div>
+
+      </main>
+
+    </div>
+  );
+};
+
+export default App;
